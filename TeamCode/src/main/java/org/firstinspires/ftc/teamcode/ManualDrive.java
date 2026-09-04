@@ -8,13 +8,16 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 @TeleOp(name="ManualDrive", group="Linear OpMode")
 public class ManualDrive extends LinearOpMode {
 
-    int rumbleThreshold = 2400; // minimum ticks Initialize motor variables (6000 rpm = 2800 ticks/second)
+    int rumbleThreshold = 2150; // minimum ticks Initialize motor variables (6000 rpm = 2800 ticks/second)
     DcMotor leftDrive;
     DcMotor rightDrive;
     DcMotorEx flywheelRight;
     DcMotorEx flywheelLeft;
     DcMotor elastiekWiel;
     DcMotor lift;
+
+    boolean reverse = false;
+    boolean lastState = false;
 
     @Override
     public void runOpMode() {
@@ -54,22 +57,29 @@ public class ManualDrive extends LinearOpMode {
         boolean SlowMode = false;
         double PowerL = 0;
         double PowerR = 0;
-        
+
         // Wait for the game to start (driver presses START)
         waitForStart();
 
         // Run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
+            if (gamepad1.dpad_left && !lastState){
+                reverse = true;
+                lastState = true;
+            } else if (gamepad1.dpad_left && lastState){
+                reverse = false;
+                lastState = false;
+            }
             double rpm = (flywheelLeft.getVelocity() + flywheelRight.getVelocity())/2;
             if (rpm < -rumbleThreshold){
-                gamepad1.rumble(100);
+                gamepad1.rumble(1000);
             } else {
                 gamepad1.stopRumble();
             }
-            
+
             Power = -gamepad1.left_stick_y; // Y axis on sticks are inverted
             Direction = gamepad1.right_stick_x;
-            
+
             // SlowMode Control
             SlowMode = gamepad1.right_trigger > 0.25;
             
@@ -114,8 +124,8 @@ public class ManualDrive extends LinearOpMode {
                     flywheelLeft.setVelocity( (int) (1000/60*-28) );
                     flywheelRight.setVelocity ( (int) (1000/60*-28) );
                 } else {
-                    flywheelLeft.setVelocity( (int) (6000/60*28) );
-                    flywheelRight.setVelocity( (int) (6000/60*28) );
+                    flywheelLeft.setVelocity( (int) (2200) );
+                    flywheelRight.setVelocity( (int) (2200) );
                 }
             } else {
                 flywheelLeft.setVelocity(0);
