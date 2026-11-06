@@ -7,6 +7,8 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 @TeleOp(name="MecanumDrive", group="Linear OpMode")
 public class MecanumDrive extends LinearOpMode{
+    double slowModeMultiplier = 0.5f; // slowmode multiplier (Change this to change slowmode speed)
+    double smm; // slowmode multiplier (changes in code) do not set slowmode speed here.
     double turn;
     double forward;
     double strafe;
@@ -39,10 +41,17 @@ public class MecanumDrive extends LinearOpMode{
         backRight.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
         waitForStart();
-        while(opModeIsActive()){
+        while(opModeIsActive()) {
             turn = gamepad1.right_stick_x;
             forward = -gamepad1.left_stick_y; // y_axis is inverse on left stick
             strafe = gamepad1.left_stick_x;
+
+            // slows down the entire drivetrain for extra precision
+            if (gamepad1.right_trigger > 0.25) {
+                slowModeMultiplier = smm;
+            } else {
+                slowModeMultiplier = 1.0f;
+            }
 
             turn = turn * maxDrivePower;
             forward = forward * maxDrivePower;
@@ -65,10 +74,10 @@ public class MecanumDrive extends LinearOpMode{
                 br /= max;
             }
 
-            frontLeft.setVelocity(fl*2600);
-            frontRight.setVelocity(fr*2600);
-            backLeft.setVelocity(bl*2600);
-            backRight.setVelocity(br*2600);
+            frontLeft.setVelocity(fl*2600*slowModeMultiplier);
+            frontRight.setVelocity(fr*2600*slowModeMultiplier);
+            backLeft.setVelocity(bl*2600*slowModeMultiplier);
+            backRight.setVelocity(br*2600*slowModeMultiplier);
 
             telemetry.addData("frontLeft T/s: ", frontLeft.getVelocity());
             telemetry.addData("frontRight T/s: ", frontRight.getVelocity());
